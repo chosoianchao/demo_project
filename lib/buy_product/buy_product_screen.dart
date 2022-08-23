@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:demo_project/Utils.dart';
 import 'package:demo_project/model/cart_product.dart';
 import 'package:demo_project/view/appbar.dart';
 import 'package:demo_project/view/padding_view.dart';
@@ -14,10 +17,14 @@ class BuyProductScreen extends StatefulWidget {
 }
 
 class _BuyProductScreenState extends State<BuyProductScreen> {
+  HashMap<int, int> mapTotal = HashMap<int, int>();
+  var total = 0;
+
   @override
   Widget build(BuildContext context) {
     final products =
         ModalRoute.of(context)?.settings.arguments as List<CartProduct>;
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBarView(
@@ -39,8 +46,24 @@ class _BuyProductScreenState extends State<BuyProductScreen> {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 var item = products[index];
+
                 return CartItems(
                   cartProduct: item,
+                  callback: (val) {
+                    setState(() {
+                      mapTotal[index] = val;
+                      var listKeys = mapTotal.keys.toList();
+                      for (int k in listKeys) {
+                        if (k == index) {
+                          total = 0;
+                        }
+                      }
+                      var listValues = mapTotal.values.toList();
+                      for (int v in listValues) {
+                        total += v;
+                      }
+                    });
+                  },
                 );
               },
             ),
@@ -53,12 +76,15 @@ class _BuyProductScreenState extends State<BuyProductScreen> {
                     horizontal: 20,
                     vertical: 0,
                     widget: Row(
-                      children: const [
-                        TextView(
+                      children: [
+                        const TextView(
                             data: 'Total', isBold: true, color: Colors.black),
-                        Spacer(),
+                        const Spacer(),
                         TextView(
-                            data: '400', isBold: true, color: Colors.orange),
+                          isBold: true,
+                          color: Colors.orange,
+                          data: '${Utils.formatNumber(total)} VNĐ',
+                        ),
                       ],
                     ),
                   ),
@@ -68,7 +94,22 @@ class _BuyProductScreenState extends State<BuyProductScreen> {
                     widget: SizedBox(
                       width: double.infinity,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                          );
+                          Future.delayed(const Duration(milliseconds: 1000),
+                              () {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop('dialog');
+                            _payProduct(products, total, mapTotal);
+                          });
+                        },
                         style: ButtonStyle(
                           shape: MaterialStateProperty.all(
                             RoundedRectangleBorder(
@@ -79,7 +120,10 @@ class _BuyProductScreenState extends State<BuyProductScreen> {
                               MaterialStateProperty.all(Colors.orange),
                         ),
                         child: const TextView(
-                            data: 'Buy now', isBold: true, color: Colors.white),
+                          data: 'Buy now',
+                          isBold: true,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -90,5 +134,26 @@ class _BuyProductScreenState extends State<BuyProductScreen> {
         ),
       ),
     );
+  }
+
+  void _payProduct(
+      List<CartProduct> products, int total, HashMap<int, int> mapTotal) {
+    if (total == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Hãy chọn số lượng để thanh toán"),
+        ),
+      );
+      return;
+    }
+    total = 0;
+    mapTotal.clear();
+    products.clear();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Thanh toán thành công"),
+      ),
+    );
+    Navigator.pop(context, products);
   }
 }

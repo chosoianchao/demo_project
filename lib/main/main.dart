@@ -2,10 +2,16 @@ import 'package:demo_project/buy_product/buy_product_screen.dart';
 import 'package:demo_project/constants.dart';
 import 'package:demo_project/information_product/information_product_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../home_screen/components/home_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((value) => runApp(const MyApp()));
   runApp(const MyApp());
 }
 

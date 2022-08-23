@@ -8,6 +8,7 @@ import 'package:demo_project/view/bottom_navigation_bar.dart';
 import 'package:demo_project/view/padding_view.dart';
 import 'package:demo_project/view/text_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'list/list_ads_items.dart';
 
@@ -22,7 +23,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _listItems = <Product>[];
-  final _listItemsCart = <CartProduct>[];
+  var _listItemsCart = <CartProduct>[];
 
   @override
   void initState() {
@@ -115,108 +116,113 @@ class _MyHomePageState extends State<MyHomePage> {
           iconLeading: const Icon(Icons.ac_unit_outlined),
           title: "",
           onPressIconAction: () {
-            onPressSearch(_listItemsCart);
+            _onPressSearch(_listItemsCart);
           },
           onPressIconLeading: () {},
         ),
         bottomNavigationBar: const BottomNavigationBarView(),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PaddingView(
-              horizontal: 20,
-              vertical: 20,
-              widget: Row(
-                children: const [
-                  TextView(
-                    data: 'Hello Rocky',
-                    isBold: true,
-                    color: Colors.black,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Icon(
-                      Icons.emoji_emotions_sharp,
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PaddingView(
+                horizontal: 20,
+                vertical: 20,
+                widget: Row(
+                  children: const [
+                    TextView(
+                      data: 'Hello Rocky',
+                      isBold: true,
+                      color: Colors.black,
                     ),
-                  )
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Icon(
+                        Icons.emoji_emotions_sharp,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              const PaddingView(
+                horizontal: 20,
+                vertical: 0,
+                widget: TextView(
+                  data: "Let's get's somethings?",
+                  color: Colors.black,
+                  isBold: false,
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 120),
+                child: const ListAdsItems(),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const PaddingView(
+                    horizontal: 20,
+                    vertical: 0,
+                    widget: TextView(
+                      data: ' Top categories',
+                      isBold: true,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {},
+                    child: const TextView(
+                      data: "See all",
+                      color: Colors.orange,
+                      isBold: true,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const PaddingView(
-              horizontal: 20,
-              vertical: 0,
-              widget: TextView(
-                data: "Let's get's somethings?",
-                color: Colors.black,
-                isBold: false,
+              PaddingView(
+                horizontal: 20,
+                vertical: 0,
+                widget: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 50),
+                  child: const ListItemCategories(),
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 120),
-              child: const ListAdsItems(),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                const PaddingView(
-                  horizontal: 20,
-                  vertical: 0,
-                  widget: TextView(
-                    data: ' Top categories',
-                    isBold: true,
-                    color: Colors.black,
+              const SizedBox(
+                height: 30,
+              ),
+              PaddingView(
+                horizontal: 20,
+                vertical: 0,
+                widget: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height,
                   ),
+                  child: ListProducts(
+                      goToScreenM2: _goToScreenM2, listItems: _listItems),
                 ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {},
-                  child: const TextView(
-                    data: "See all",
-                    color: Colors.orange,
-                    isBold: true,
-                  ),
-                ),
-              ],
-            ),
-            PaddingView(
-              horizontal: 20,
-              vertical: 0,
-              widget: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 50),
-                child: const ListItemCategories(),
               ),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            PaddingView(
-              horizontal: 20,
-              vertical: 0,
-              widget: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 300,
-                ),
-                child: ListProducts(
-                    goToScreenM2: goToScreenM2, listItems: _listItems),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  onPressSearch(List<CartProduct> listItemsCart) {
-    Navigator.pushNamed(context, Constants.buyProductScreen,
+  _onPressSearch(List<CartProduct> listItemsCart) async {
+    var result = await Navigator.pushNamed(context, Constants.buyProductScreen,
         arguments: listItemsCart);
+    setState(() {
+      _listItemsCart = result as List<CartProduct>;
+    });
   }
 
-  goToScreenM2(Product product) async {
+  _goToScreenM2(Product product) async {
     final result = await Navigator.pushNamed(
         context, Constants.informationProductScreen,
         arguments: product);

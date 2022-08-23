@@ -4,11 +4,14 @@ import 'package:demo_project/view/text_view.dart';
 import 'package:flutter/material.dart';
 
 import '../Utils.dart';
+import '../on_action_call_back.dart';
 
 class CartItems extends StatefulWidget {
   final CartProduct cartProduct;
+  final OnActionCallback callback;
 
-  const CartItems({Key? key, required this.cartProduct}) : super(key: key);
+  const CartItems({Key? key, required this.cartProduct, required this.callback})
+      : super(key: key);
 
   @override
   State<CartItems> createState() => _CartItemsState();
@@ -16,6 +19,7 @@ class CartItems extends StatefulWidget {
 
 class _CartItemsState extends State<CartItems> {
   int count = 0;
+  int total = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +61,9 @@ class _CartItemsState extends State<CartItems> {
                       color: Colors.black),
                 ],
               ),
-              Container(
+              const Spacer(),
+              Align(
                 alignment: Alignment.bottomCenter,
-                margin: const EdgeInsets.only(left: 40.0),
                 child: Card(
                   child: Row(
                     children: [
@@ -70,6 +74,8 @@ class _CartItemsState extends State<CartItems> {
                               return;
                             }
                             count--;
+                            total = count * widget.cartProduct.price;
+                            widget.callback(total);
                           });
                         },
                         icon: const Icon(Icons.remove),
@@ -91,6 +97,8 @@ class _CartItemsState extends State<CartItems> {
                               return;
                             }
                             count++;
+                            total = count * widget.cartProduct.price;
+                            widget.callback(total);
                           });
                         },
                         icon: const Icon(
